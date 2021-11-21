@@ -26,16 +26,18 @@ namespace WLPBlatesManager.Controllers
 
         // GET: api/Plates
         [HttpGet]
-        public string Get()
+        public async Task<ActionResult>  Get()
         {
-            return _jsonParser.SerializeObject(_platesRepository.GetAllPlates());
+            var result = await _platesRepository.GetAllPlates();
+            return Ok(_jsonParser.SerializeObject(result));
         }
 
         // GET: api/Plates/5
-        [HttpGet("{id}", Name = "Get")]
-        public string Get(int id)
+        [HttpGet("{weight}")]
+        public async Task<ActionResult<Plate>> Get(double weight)
         {
-            return _jsonParser.SerializeObject(_platesRepository.GetAllPlates().Where(plates => plates.weight==id).FirstOrDefault()); ;
+            var result = await _platesRepository.GetPlate(weight);
+            return Ok( _jsonParser.SerializeObject(result));
         }
 
         // POST: api/Plates

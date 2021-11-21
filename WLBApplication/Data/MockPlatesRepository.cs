@@ -10,7 +10,7 @@ namespace WLPBlatesManager.Model
 
         List<Plate> plateRepo = new List<Plate>();
 
-        public List<Plate> GetAllPlates()
+        public MockPlatesRepository()
         {
             plateRepo.Add(new Plate { Name = "2.5LB", weight = 2.5 });
             plateRepo.Add(new Plate { Name = "5LB", weight = 5 });
@@ -18,8 +18,18 @@ namespace WLPBlatesManager.Model
             plateRepo.Add(new Plate { Name = "25LB", weight = 25 });
             plateRepo.Add(new Plate { Name = "35LB", weight = 35 });
             plateRepo.Add(new Plate { Name = "45LB", weight = 45 });
+        }
 
-            return plateRepo;
+        public async Task<IEnumerable<Plate>> GetAllPlates()
+        {
+            await Task.CompletedTask;
+            return  plateRepo;
+        }
+
+        public async Task<Plate> GetPlate(double weight)
+        {
+            await Task.CompletedTask;
+            return plateRepo.Where(w => w.weight == weight).FirstOrDefault();
         }
 
     }

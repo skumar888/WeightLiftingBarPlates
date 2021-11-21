@@ -29,7 +29,7 @@ namespace WLPBlatesManager
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
-            services.AddSingleton<IPlatesRepository, MockPlatesRepository>();
+            services.AddScoped<IPlatesRepository, MockPlatesRepository>();
             services.AddServices();
         }
 
