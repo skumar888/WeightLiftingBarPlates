@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using WLPBlatesManager.Model;
 using WLBApplication.Application;
+using WLBLoggingService;
 
 namespace WLPBlatesManager.Controllers
 {
@@ -16,20 +17,25 @@ namespace WLPBlatesManager.Controllers
 
         private readonly IPlatesRepository _platesRepository;
         private readonly IJsonParser _jsonParser;
+        private readonly ILoggerManager _logManager;
 
-        public PlatesController(IPlatesRepository platesRepository, IJsonParser jsonParser)
+        public PlatesController(IPlatesRepository platesRepository, IJsonParser jsonParser, ILoggerManager logManager)
         {
 
             _platesRepository = platesRepository;
             _jsonParser = jsonParser;
+            _logManager = logManager;
         }
 
         // GET: api/Plates
         [HttpGet]
         public async Task<ActionResult>  Get()
         {
+            _logManager.LogInfo("Request recieved for all plates");
             var result = await _platesRepository.GetAllPlates();
-            return Ok(_jsonParser.SerializeObject(result));
+
+            _logManager.LogInfo($"Reply sent{_jsonParser.SerializeObject(result)}");
+            return Ok(_jsonParser.SerializeDeserializeObject(result));
         }
 
         // GET: api/Plates/5
@@ -37,7 +43,7 @@ namespace WLPBlatesManager.Controllers
         public async Task<ActionResult<Plate>> Get(double weight)
         {
             var result = await _platesRepository.GetPlate(weight);
-            return Ok( _jsonParser.SerializeObject(result));
+            return Ok( _jsonParser.SerializeDeserializeObject(result));
         }
 
         // POST: api/Plates

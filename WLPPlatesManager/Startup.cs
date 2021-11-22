@@ -12,6 +12,8 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using WLPBlatesManager.Model;
 using WLBApplication.IOC;
+using WLBLoggingService;
+using NLog;
 
 
 namespace WLPBlatesManager
@@ -29,8 +31,10 @@ namespace WLPBlatesManager
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
-            services.AddScoped<IPlatesRepository, MockPlatesRepository>();
             services.AddServices();
+
+            services.AddScoped<IPlatesRepository, MockPlatesRepository>();
+            services.AddSingleton<ILoggerManager, LoggerManager>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

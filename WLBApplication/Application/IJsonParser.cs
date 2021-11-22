@@ -1,11 +1,12 @@
 ﻿using System.Collections.Generic;
 using WLPBlatesManager.Model;
-
+using System;
 namespace WLBApplication.Application
 {
     public interface IJsonParser
     {
-        public IEnumerable<Plate> SerializeObject(IEnumerable<object> objects);
-        public Plate SerializeObject(object obj);
+        public IEnumerable<Plate> SerializeDeserializeObject(IEnumerable<Object> objects);
+        public Plate SerializeDeserializeObject(Object obj);
+        public string SerializeObject(Object obj);
     }
 }
