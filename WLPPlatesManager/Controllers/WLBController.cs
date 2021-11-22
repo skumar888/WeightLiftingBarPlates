@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using WLBApplication.Application;
 using WLBApplication.Model;
 using WLPBlatesManager.Model;
 
@@ -14,21 +15,32 @@ namespace WLBPlatesManager.Controllers
     public class WLBController : ControllerBase
     {
         private const double weight = 45;
+        private IJsonParser _jsonParser;
+        private IInputValidatorAndParser _inputValidatorAndParser;
+        private IGetMinimumPlates _getMinimumPlates;
+
+        public WLBController(IJsonParser jsonParser, IInputValidatorAndParser inputValidatorAndParser, IGetMinimumPlates getMinimumPlates)
+        {
+            _jsonParser = jsonParser;
+            _inputValidatorAndParser = inputValidatorAndParser;
+            _getMinimumPlates = getMinimumPlates;
+        }
 
         // GET: api/WLB
         [HttpGet]
-        public async Task<ActionResult> Get()
+        public ActionResult Get()
         {
-            await Task.CompletedTask;
             return Ok(weight);
         }
 
         // GET: api/WLB/5
         [HttpGet("{inputString}")]
-        public async Task<ActionResult<WLBMinResult>> Get(string inputString)
+        public string Get(string inputString)
         {
+            var inputArray = _inputValidatorAndParser.ValidateAndParseWeight(inputString);
+            var result = _getMinimumPlates.GetMinimumPairedPlatesForWeights(inputArray, weight);
+            return  _jsonParser.SerializeObject(result);
 
-            return new WLBMinResult();
         }
 
         // POST: api/WLB

@@ -6,7 +6,7 @@ namespace WLBApplication.Model
 {
     public class WLBMinResult
     {
-        public int  requestedWeight{ get; set; }
-        public Dictionary<string, int> minWeightList{ get; set; }
+        public double  requestedWeight{ get; set; }
+        public List<KeyValuePair<string, int>> minWeightList = new List<KeyValuePair<string, int>>();
     }
 }

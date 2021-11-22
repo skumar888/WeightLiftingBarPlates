@@ -23,7 +23,7 @@ namespace WLPBlatesManager.Model
         public async Task<IEnumerable<Plate>> GetAllPlates()
         {
             await Task.CompletedTask;
-            return  plateRepo;
+            return  plateRepo.ToList();
         }
 
         public async Task<Plate> GetPlate(double weight)

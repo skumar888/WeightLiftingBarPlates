@@ -11,6 +11,8 @@ namespace WLBApplication.IOC
         public static void AddServices(this IServiceCollection services)
         {
             services.AddScoped<IJsonParser, JsonParser>();
+            services.AddScoped<IInputValidatorAndParser, InputValidatorAndParser>();
+            services.AddScoped<IGetMinimumPlates, GetMinimumPlates>();
         }
 
     }

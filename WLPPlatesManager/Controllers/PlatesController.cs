@@ -34,7 +34,7 @@ namespace WLPBlatesManager.Controllers
             _logManager.LogInfo("Request recieved for all plates");
             var result = await _platesRepository.GetAllPlates();
 
-            _logManager.LogInfo($"Reply sent{_jsonParser.SerializeObject(result)}");
+            _logManager.LogInfo($"Response sent{_jsonParser.SerializeObject(result)}");
             return Ok(_jsonParser.SerializeDeserializeObject(result));
         }
 
@@ -42,7 +42,10 @@ namespace WLPBlatesManager.Controllers
         [HttpGet("{weight}")]
         public async Task<ActionResult<Plate>> Get(double weight)
         {
+            _logManager.LogInfo($"Request recieved for plate {weight}");
             var result = await _platesRepository.GetPlate(weight);
+
+            _logManager.LogInfo($"Response sent{_jsonParser.SerializeObject(result)}");
             return Ok( _jsonParser.SerializeDeserializeObject(result));
         }
 

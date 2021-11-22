@@ -25,6 +25,5 @@ namespace WLBApplication.Application
         {
             return JsonSerializer.Serialize(obj);
         }
-
     }
 }
