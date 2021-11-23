@@ -40,7 +40,7 @@ namespace WLPBlatesManager.Controllers
 
         // GET: api/Plates/5
         [HttpGet("{weight}")]
-        public async Task<ActionResult<Plate>> Get(double weight)
+        public async Task<ActionResult<Plate>> Get(decimal weight)
         {
             _logManager.LogInfo($"Request recieved for plate {weight}");
             var result = await _platesRepository.GetPlate(weight);

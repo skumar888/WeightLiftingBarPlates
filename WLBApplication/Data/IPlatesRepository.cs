@@ -6,6 +6,6 @@ namespace WLPBlatesManager.Model
     public interface IPlatesRepository
     {
         public Task<IEnumerable<Plate>> GetAllPlates();
-        public Task<Plate> GetPlate(double weight);
+        public Task<Plate> GetPlate(decimal weight);
     }
 }

@@ -25,5 +25,10 @@ namespace WLBApplication.Application
         {
             return JsonSerializer.Serialize(obj);
         }
+
+        public string SerializeObjects(IEnumerable<Object> objects)
+        {
+            return JsonSerializer.Serialize<IEnumerable<Object>>(objects);
+        }
     }
 }

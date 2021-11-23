@@ -7,6 +7,6 @@ namespace WLBApplication.Model
     public class Equipment
     {
         public string name { get; set; }
-        public double weight { get; set; }
+        public decimal weight { get; set; }
     }
 }

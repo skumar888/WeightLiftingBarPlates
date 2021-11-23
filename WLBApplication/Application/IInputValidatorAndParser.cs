@@ -1,7 +1,10 @@
-﻿namespace WLBApplication.Application
+﻿using System.Collections.Generic;
+using WLBApplication.Model;
+
+namespace WLBApplication.Application
 {
     public interface IInputValidatorAndParser
     {
-        double[] ValidateAndParseWeight(string inputString);
+        List<InputWeight> ValidateAndParseWeight(string inputString, decimal precision, decimal maxAllowedWeight);
     }
 }
