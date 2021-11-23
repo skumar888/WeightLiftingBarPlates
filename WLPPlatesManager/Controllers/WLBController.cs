@@ -38,13 +38,13 @@ namespace WLBPlatesManager.Controllers
 
         // GET: api/WLB/5
         [HttpGet("{inputString}")]
-        public ActionResult<IEnumerable<WLBMinResult>> Get(string inputString) //ActionResult<IEnumerable< WLBMinResult>>
+        public ActionResult<Object> Get(string inputString) //ActionResult<IEnumerable< WLBMinResult>>
         {
             var precision = _configuration.GetValue<decimal>("WLBPlatesWeightPrecision");
             var maximumAllowedWeight = _configuration.GetValue<decimal>("WLBMaximumAllowedWeight");
             var inputArray = _inputValidatorAndParser.ValidateAndParseWeight(inputString, precision, maximumAllowedWeight);
-            return   _getMinimumPlates.GetMinimumPairedPlatesForWeights(inputArray, weight, precision);
-            //return  _jsonParser.SerializeObjects(result);
+            var result=   _getMinimumPlates.GetMinimumPairedPlatesForWeights(inputArray, weight, precision);
+            return  Ok(_jsonParser.SerializeObjects(result));
 
         }
 

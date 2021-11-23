@@ -35,7 +35,7 @@ namespace WLPBlatesManager.Controllers
             var result = await _platesRepository.GetAllPlates();
 
             _logManager.LogInfo($"Response sent{_jsonParser.SerializeObject(result)}");
-            return Ok(_jsonParser.SerializeDeserializeObject(result));
+            return Ok(_jsonParser.SerializeObjects(result));
         }
 
         // GET: api/Plates/5
@@ -46,7 +46,7 @@ namespace WLPBlatesManager.Controllers
             var result = await _platesRepository.GetPlate(weight);
 
             _logManager.LogInfo($"Response sent{_jsonParser.SerializeObject(result)}");
-            return Ok( _jsonParser.SerializeDeserializeObject(result));
+            return Ok( _jsonParser.SerializeObject(result));
         }
 
         // POST: api/Plates
