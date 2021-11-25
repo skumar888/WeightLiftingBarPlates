@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WLBApplication.Cache;
 using WLBApplication.Model;
 using WLPBlatesManager.Model;
 
@@ -10,24 +11,28 @@ namespace WLBApplication.Application
 {
     public class GetMinimumPlates : IGetMinimumPlates
     {
-        private readonly IPlatesRepository _platesRepository;
+        private readonly IWLBMinWeightCache _WLBMinWeightCache;
 
-        public GetMinimumPlates(IPlatesRepository platesRepository )
+        public GetMinimumPlates(IWLBMinWeightCache WLBMinWeightCache)
         {
-            _platesRepository = platesRepository;
+            _WLBMinWeightCache = WLBMinWeightCache;
         }
-        public  List<WLBMinResult> GetMinimumPairedPlatesForWeights(List<InputWeight> inputWeights, decimal equipmentWeight, decimal dblPrecision)
+        public  List<WLBMinResult> GetMinimumPairedPlatesForWeights(List<InputWeight> inputWeights, decimal equipmentWeight, decimal dblPrecision, List<Plate> plates)
         {
             int precision = Convert.ToInt32(1 / dblPrecision);
-            var plates = _platesRepository.GetAllPlates();
             List<WLBMinResult> resultList = new List<WLBMinResult>();
             int maxRequestedWeight = (Convert.ToInt32( inputWeights.Max(x=>x.weight)) +1);
 
-            WLBMinResult[] interimResultCache = new WLBMinResult[(maxRequestedWeight * precision)];//To DO:should gathered plates from model
+            WLBMinResult[] interimResultCache = new WLBMinResult[(maxRequestedWeight * precision)];
 
-            IntializeWLBMinResultArray(interimResultCache, (maxRequestedWeight * precision) + 1);
-
-            GetMinimumPairedPlatesForWeight(maxRequestedWeight * precision, ((List<Plate>)plates.Result).OrderBy(p=>p.weight).ToList(), interimResultCache, precision);
+            if (_WLBMinWeightCache.PeakWLBMinWeightResultCache() >= (maxRequestedWeight * precision))
+                interimResultCache = _WLBMinWeightCache.GetWLBMinWeightResultCache();
+            else
+            {
+                IntializeWLBMinResultArray(interimResultCache, (maxRequestedWeight * precision) + 1);
+                GetMinimumPairedPlatesForWeight(maxRequestedWeight * precision, plates.OrderBy(p => p.weight).ToList(), interimResultCache, precision);
+                _WLBMinWeightCache.AddWLBMinWeightResultCache(interimResultCache); 
+            }
             foreach (InputWeight inputWeight in inputWeights)
             {
 

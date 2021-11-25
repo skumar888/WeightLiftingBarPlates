@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using WLBApplication.Application;
 using WLBApplication.Model;
+using WLBLoggingService;
 using WLPBlatesManager.Model;
 
 namespace WLBPlatesManager.Controllers
@@ -15,18 +16,22 @@ namespace WLBPlatesManager.Controllers
     [ApiController]
     public class WLBController : ControllerBase
     {
-        private const decimal weight = 45;
+        private const decimal weight = 45; //toDo: update the name to equiweight
         private IJsonParser _jsonParser;
         private IInputValidatorAndParser _inputValidatorAndParser;
         private IGetMinimumPlates _getMinimumPlates;
-        IConfiguration _configuration;
+        private IConfiguration _configuration;
+        private ILoggerManager _loggerManager;
+        private readonly IPlatesRepository _platesRepository;
 
-        public WLBController(IJsonParser jsonParser, IInputValidatorAndParser inputValidatorAndParser, IGetMinimumPlates getMinimumPlates, IConfiguration configuration)
+        public WLBController(IJsonParser jsonParser, IInputValidatorAndParser inputValidatorAndParser, IGetMinimumPlates getMinimumPlates, IConfiguration configuration, ILoggerManager loggerManager ,IPlatesRepository platesRepository)
         {
             _jsonParser = jsonParser;
             _inputValidatorAndParser = inputValidatorAndParser;
             _getMinimumPlates = getMinimumPlates;
             _configuration = configuration;
+            _loggerManager = loggerManager;
+            _platesRepository = platesRepository;
         }
 
         // GET: api/WLB
@@ -38,12 +43,17 @@ namespace WLBPlatesManager.Controllers
 
         // GET: api/WLB/5
         [HttpGet("{inputString}")]
-        public ActionResult<Object> Get(string inputString) //ActionResult<IEnumerable< WLBMinResult>>
+        public async Task<ActionResult<Object>> Get(string inputString) //ActionResult<IEnumerable< WLBMinResult>>
         {
+            _loggerManager.LogInfo($"Request recieved for min weight list :{inputString}");
+
+            var availaiblePlates = await _platesRepository.GetAllPlates();
+            //var precision = _inputValidatorAndParser.GetPricision(availaiblePlates.ToList().Select(x=>x.weight).ToArray());
             var precision = _configuration.GetValue<decimal>("WLBPlatesWeightPrecision");
             var maximumAllowedWeight = _configuration.GetValue<decimal>("WLBMaximumAllowedWeight");
-            var inputArray = _inputValidatorAndParser.ValidateAndParseWeight(inputString, precision, maximumAllowedWeight);
-            var result=   _getMinimumPlates.GetMinimumPairedPlatesForWeights(inputArray, weight, precision);
+
+            var inputWeighrList = _inputValidatorAndParser.ValidateAndParseWeight(inputString, maximumAllowedWeight, availaiblePlates.ToList(), weight);
+            var result=   _getMinimumPlates.GetMinimumPairedPlatesForWeights(inputWeighrList, weight, precision, availaiblePlates.ToList());
             return  Ok(_jsonParser.SerializeObjects(result));
 
         }
@@ -52,6 +62,9 @@ namespace WLBPlatesManager.Controllers
         [HttpPost]
         public void Post([FromBody] string value)
         {
+            //ToDO:implement min list in post
+            //remember 
+
         }
 
         // PUT: api/WLB/5
