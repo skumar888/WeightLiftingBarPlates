@@ -6,7 +6,7 @@ namespace WLBApplication.Application
 {
     public interface IInputValidatorAndParser
     {
-        List<InputWeight> ValidateAndParseWeight(string inputString, decimal maxAllowedWeight, List<Plate> availablePlates, decimal equipmentWeight);
+        List<InputWeight> ValidateAndParseWeight(string inputString, decimal maxAllowedWeight, List<Plate> availablePlates, decimal equipmentWeight, decimal precision);
         public decimal GetPricision(decimal[] inputWeights);
     }
 }

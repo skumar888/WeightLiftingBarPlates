@@ -10,11 +10,11 @@ namespace WLBApplication.Application
     public class InputValidatorAndParser : IInputValidatorAndParser
     {
         private List<InputWeight> inputWeightList = new List<InputWeight>();
-        public List<InputWeight> ValidateAndParseWeight(string inputString, decimal maxAllowedWeight, List<Plate> availablePlates, decimal equipmentWeight)
+        public List<InputWeight> ValidateAndParseWeight(string inputString, decimal maxAllowedWeight, List<Plate> availablePlates, decimal equipmentWeight, decimal precision)
         {
             ValidateWeights(inputString);
 
-            var precision = GetPricision(availablePlates.Select(x=>x.weight).ToArray());//ToDo:Change precision to min weight
+            //var precision = GetPricision(availablePlates.Select(x=>x.weight).ToArray());//ToDo:Change precision to min weight
 
             foreach (InputWeight inputWeight in inputWeightList)
             {

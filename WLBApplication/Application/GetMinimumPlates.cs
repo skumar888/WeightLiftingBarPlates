@@ -19,17 +19,17 @@ namespace WLBApplication.Application
         }
         public  List<WLBMinResult> GetMinimumPairedPlatesForWeights(List<InputWeight> inputWeights, decimal equipmentWeight, decimal dblPrecision, List<Plate> plates)
         {
-            int precision = Convert.ToInt32(1 / dblPrecision);
+            decimal precision = 1 / dblPrecision;
             List<WLBMinResult> resultList = new List<WLBMinResult>();
-            int maxRequestedWeight = (Convert.ToInt32( inputWeights.Max(x=>x.weight)) +1);
+            int maxRequestedWeight = (Convert.ToInt32( inputWeights.Max(x=>x.weight)) );
 
-            WLBMinResult[] interimResultCache = new WLBMinResult[(maxRequestedWeight * precision)];
+            WLBMinResult[] interimResultCache = new WLBMinResult[Convert.ToInt32(maxRequestedWeight * precision)];
 
-            if (_WLBMinWeightCache.PeakWLBMinWeightResultCache() >= (maxRequestedWeight * precision))
+            if (_WLBMinWeightCache.PeakWLBMinWeightResultCache() >= (maxRequestedWeight * precision) )
                 interimResultCache = _WLBMinWeightCache.GetWLBMinWeightResultCache();
             else
             {
-                IntializeWLBMinResultArray(interimResultCache, (maxRequestedWeight * precision) + 1);
+                IntializeWLBMinResultArray(interimResultCache, Convert.ToInt32(maxRequestedWeight * precision) + 1);
                 GetMinimumPairedPlatesForWeight(maxRequestedWeight * precision, plates.OrderBy(p => p.weight).ToList(), interimResultCache, precision);
                 _WLBMinWeightCache.AddWLBMinWeightResultCache(interimResultCache); 
             }
@@ -59,7 +59,7 @@ namespace WLBApplication.Application
 
             return resultList;
         }
-        private void GetMinimumPairedPlatesForWeight(decimal inputWeight, List<Plate> availablePlates, WLBMinResult[] resultCache,int precision)
+        private void GetMinimumPairedPlatesForWeight(decimal inputWeight, List<Plate> availablePlates, WLBMinResult[] resultCache,decimal precision)
         {
             WLBMinResult tempResultPlaceholder;
             for (int i = 1; i < inputWeight; i++)

@@ -48,11 +48,11 @@ namespace WLBPlatesManager.Controllers
             _loggerManager.LogInfo($"Request recieved for min weight list :{inputString}");
 
             var availaiblePlates = await _platesRepository.GetAllPlates();
-            //var precision = _inputValidatorAndParser.GetPricision(availaiblePlates.ToList().Select(x=>x.weight).ToArray());
-            var precision = _configuration.GetValue<decimal>("WLBPlatesWeightPrecision");
+            var precision = _inputValidatorAndParser.GetPricision(availaiblePlates.ToList().Select(x=>x.weight).ToArray());
+            //var precision = _configuration.GetValue<decimal>("WLBPlatesWeightPrecision");
             var maximumAllowedWeight = _configuration.GetValue<decimal>("WLBMaximumAllowedWeight");
 
-            var inputWeighrList = _inputValidatorAndParser.ValidateAndParseWeight(inputString, maximumAllowedWeight, availaiblePlates.ToList(), weight);
+            var inputWeighrList = _inputValidatorAndParser.ValidateAndParseWeight(inputString, maximumAllowedWeight, availaiblePlates.ToList(), weight,precision);
             var result=   _getMinimumPlates.GetMinimumPairedPlatesForWeights(inputWeighrList, weight, precision, availaiblePlates.ToList());
             return  Ok(_jsonParser.SerializeObjects(result));
 
