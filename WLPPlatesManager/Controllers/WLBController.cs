@@ -16,7 +16,7 @@ namespace WLBPlatesManager.Controllers
     [ApiController]
     public class WLBController : ControllerBase
     {
-        private const decimal weight = 45; //toDo: update the name to equiweight
+        private const decimal equipmentWeight = 45;
         private IJsonParser _jsonParser;
         private IInputValidatorAndParser _inputValidatorAndParser;
         private IGetMinimumPlates _getMinimumPlates;
@@ -36,47 +36,33 @@ namespace WLBPlatesManager.Controllers
 
         // GET: api/WLB
         [HttpGet]
-        public ActionResult Get()
+        public ActionResult GetEquipWeight()
         {
-            return Ok(weight);
+            return Ok(equipmentWeight);
         }
 
-        // GET: api/WLB/5
-        [HttpGet("{inputString}")]
-        public async Task<ActionResult<Object>> Get(string inputString) //ActionResult<IEnumerable< WLBMinResult>>
+        // POST: api/WLB/
+        [HttpPost]
+        public async Task<ActionResult<Object>> GetMinimumPlates([FromBody]string inputString) 
         {
             _loggerManager.LogInfo($"Request recieved for min weight list :{inputString}");
 
-            var availaiblePlates = await _platesRepository.GetAllPlates();
-            var precision = _inputValidatorAndParser.GetPricision(availaiblePlates.ToList().Select(x=>x.weight).ToArray());
-            //var precision = _configuration.GetValue<decimal>("WLBPlatesWeightPrecision");
-            var maximumAllowedWeight = _configuration.GetValue<decimal>("WLBMaximumAllowedWeight");
+            if (inputString == null)
+            {
+                _loggerManager.LogError($"Input String missing");
+                return BadRequest();
+            }
 
-            var inputWeighrList = _inputValidatorAndParser.ValidateAndParseWeight(inputString, maximumAllowedWeight, availaiblePlates.ToList(), weight,precision);
-            var result=   _getMinimumPlates.GetMinimumPairedPlatesForWeights(inputWeighrList, weight, precision, availaiblePlates.ToList());
+            var WLBMaximumAllowedWeightIndexes = _configuration.GetValue<decimal>("WLBMaximumAllowedWeightIndexes");
+
+            var availaiblePlates = await _platesRepository.GetAllPlates();
+            var precision = _inputValidatorAndParser.GetPrecision(availaiblePlates.ToList().Select(x=>x.weight).ToArray());//gets GCD of available weight plates, which will be used to verify input weights and cal min plates
+            
+
+            var inputWeighrList = _inputValidatorAndParser.ValidateAndParseWeight(inputString, WLBMaximumAllowedWeightIndexes, availaiblePlates.ToList(), equipmentWeight, precision);
+            var result=   _getMinimumPlates.GetMinimumPairedPlatesForWeights(inputWeighrList, equipmentWeight, precision, availaiblePlates.ToList());
             return  Ok(_jsonParser.SerializeObjects(result));
 
-        }
-
-        // POST: api/WLB
-        [HttpPost]
-        public void Post([FromBody] string value)
-        {
-            //ToDO:implement min list in post
-            //remember 
-
-        }
-
-        // PUT: api/WLB/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
-        {
-        }
-
-        // DELETE: api/ApiWithActions/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
         }
     }
 }

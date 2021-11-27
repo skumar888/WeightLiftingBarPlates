@@ -3,18 +3,24 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using WLBApplication.Model;
+using WLBLoggingService;
 using WLPBlatesManager.Model;
 
 namespace WLBApplication.Application
 {
     public class InputValidatorAndParser : IInputValidatorAndParser
     {
+        private ILoggerManager _loggerManager;
+        private IJsonParser _jsonParser;
+        public InputValidatorAndParser(ILoggerManager loggerManager, IJsonParser jsonParser)
+        {
+            _loggerManager =  loggerManager;
+            _jsonParser = jsonParser;
+        }
         private List<InputWeight> inputWeightList = new List<InputWeight>();
-        public List<InputWeight> ValidateAndParseWeight(string inputString, decimal maxAllowedWeight, List<Plate> availablePlates, decimal equipmentWeight, decimal precision)
+        public List<InputWeight> ValidateAndParseWeight(string inputString, decimal WLBMaximumAllowedWeightIndexes, List<Plate> availablePlates, decimal equipmentWeight, decimal precision)
         {
             ValidateWeights(inputString);
-
-            //var precision = GetPricision(availablePlates.Select(x=>x.weight).ToArray());//ToDo:Change precision to min weight
 
             foreach (InputWeight inputWeight in inputWeightList)
             {
@@ -22,8 +28,8 @@ namespace WLBApplication.Application
                 {
                     if ((inputWeight.weight-equipmentWeight) % precision != 0)
                         throw new Exception("");
-                    if(inputWeight.weight > maxAllowedWeight)
-                        throw new Exception($"Weight limit exceeded. Allowed limit is {maxAllowedWeight}lb");
+                    if(inputWeight.weight > (WLBMaximumAllowedWeightIndexes/precision))
+                        throw new Exception($"Weight limit exceeded. Allowed limit is {WLBMaximumAllowedWeightIndexes / precision}lb");
                 }
                 catch (Exception e)
                 {
@@ -33,12 +39,13 @@ namespace WLBApplication.Application
                 }
             }
 
-
+            _loggerManager.LogInfo($"Input string parsed: { _jsonParser.SerializeObjects(inputWeightList)}");
             return inputWeightList;
         }
 
         private void ValidateWeights(string inputWeightsString)
         {
+            
             string[] stringWeights = inputWeightsString.Split(',');
             decimal inputWeight;
 
@@ -55,7 +62,6 @@ namespace WLBApplication.Application
                 }
                 catch (Exception e)
                 {
-                    //todo:Add Logging
                     inputWeightList[i].isValid = false;
                     inputWeightList[i].error = e.Message;
                     inputWeightList[i].weight = 0;
@@ -63,7 +69,7 @@ namespace WLBApplication.Application
             }
         }
 
-        public decimal GetPricision(decimal[] inputWeights)
+        public decimal GetPrecision(decimal[] inputWeights)
         {
             decimal result = inputWeights[0];
             for (int i = 1; i < inputWeights.Length; i++)

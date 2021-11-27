@@ -25,5 +25,10 @@ namespace WLBApplication.Cache
             else
                 return this.WLBMinResultCache.Length;
         }
+
+        public void DeleteWLBMinWeightResultCache()
+        {
+            WLBMinResultCache = null;
+        }
     }
 }

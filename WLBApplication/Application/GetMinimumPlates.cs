@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using WLBApplication.Cache;
 using WLBApplication.Model;
+using WLBLoggingService;
 using WLPBlatesManager.Model;
 
 namespace WLBApplication.Application
@@ -12,20 +13,25 @@ namespace WLBApplication.Application
     public class GetMinimumPlates : IGetMinimumPlates
     {
         private readonly IWLBMinWeightCache _WLBMinWeightCache;
-
-        public GetMinimumPlates(IWLBMinWeightCache WLBMinWeightCache)
+        private readonly ILoggerManager _loggerManager;
+        private readonly IJsonParser _jsonParser;
+        public GetMinimumPlates(IWLBMinWeightCache WLBMinWeightCache, ILoggerManager loggerManager, IJsonParser jsonParser)
         {
             _WLBMinWeightCache = WLBMinWeightCache;
+            _loggerManager = loggerManager;
+            _jsonParser = jsonParser;
         }
         public  List<WLBMinResult> GetMinimumPairedPlatesForWeights(List<InputWeight> inputWeights, decimal equipmentWeight, decimal dblPrecision, List<Plate> plates)
         {
+            _loggerManager.LogInfo($"Starting calculation for min plates using plates:{_jsonParser.SerializeObjects(plates)}");
+
             decimal precision = 1 / dblPrecision;
             List<WLBMinResult> resultList = new List<WLBMinResult>();
             int maxRequestedWeight = (Convert.ToInt32( inputWeights.Max(x=>x.weight)) );
 
             WLBMinResult[] interimResultCache = new WLBMinResult[Convert.ToInt32(maxRequestedWeight * precision)];
 
-            if (_WLBMinWeightCache.PeakWLBMinWeightResultCache() >= (maxRequestedWeight * precision) )
+            if (_WLBMinWeightCache.PeakWLBMinWeightResultCache() >= (maxRequestedWeight * precision)  )
                 interimResultCache = _WLBMinWeightCache.GetWLBMinWeightResultCache();
             else
             {
@@ -56,7 +62,7 @@ namespace WLBApplication.Application
                     resultList.Add(interimResultCache[Convert.ToInt32((inputWeight.weight - equipmentWeight) * precision)]);
                 }
             }
-
+            _loggerManager.LogInfo($"Result calculation complete:{_jsonParser.SerializeObjects(resultList)}");
             return resultList;
         }
         private void GetMinimumPairedPlatesForWeight(decimal inputWeight, List<Plate> availablePlates, WLBMinResult[] resultCache,decimal precision)
@@ -102,7 +108,7 @@ namespace WLBApplication.Application
             {
                 interimResultCache[i] = new WLBMinResult()
                 {
-                    platesCount = maxWeight
+                    platesCount = int.MaxValue
                 };
             }
         }

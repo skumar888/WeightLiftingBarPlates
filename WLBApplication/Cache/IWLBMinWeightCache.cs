@@ -7,5 +7,6 @@ namespace WLBApplication.Cache
         void AddWLBMinWeightResultCache(WLBMinResult[] WLBMinResultsArray);
         WLBMinResult[] GetWLBMinWeightResultCache();
         int PeakWLBMinWeightResultCache();
+        public void DeleteWLBMinWeightResultCache();
     }
 }
