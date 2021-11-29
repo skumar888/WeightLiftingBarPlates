@@ -15,6 +15,7 @@ namespace WLBApplication.Application
         private readonly IWLBMinWeightCache _WLBMinWeightCache;
         private readonly ILoggerManager _loggerManager;
         private readonly IJsonParser _jsonParser;
+        private List<WLBMinResult> resultList = new List<WLBMinResult>();
         public GetMinimumPlates(IWLBMinWeightCache WLBMinWeightCache, ILoggerManager loggerManager, IJsonParser jsonParser)
         {
             _WLBMinWeightCache = WLBMinWeightCache;
@@ -25,43 +26,30 @@ namespace WLBApplication.Application
         {
             _loggerManager.LogInfo($"Starting calculation for min plates using plates:{_jsonParser.SerializeObjects(plates)}");
 
-            decimal precision = 1 / dblPrecision;
-            List<WLBMinResult> resultList = new List<WLBMinResult>();
-            int maxRequestedWeight = (Convert.ToInt32( inputWeights.Max(x=>x.weight)) );
+            WLBMinResult[] interimResultCache;
 
-            WLBMinResult[] interimResultCache = new WLBMinResult[Convert.ToInt32(maxRequestedWeight * precision)];
-
-            if (_WLBMinWeightCache.PeakWLBMinWeightResultCache() >= (maxRequestedWeight * precision)  )
-                interimResultCache = _WLBMinWeightCache.GetWLBMinWeightResultCache();
-            else
+            if (inputWeights.Any(w => w.isValid))
             {
-                IntializeWLBMinResultArray(interimResultCache, Convert.ToInt32(maxRequestedWeight * precision) + 1);
-                GetMinimumPairedPlatesForWeight(maxRequestedWeight * precision, plates.OrderBy(p => p.weight).ToList(), interimResultCache, precision);
-                _WLBMinWeightCache.AddWLBMinWeightResultCache(interimResultCache); 
-            }
-            foreach (InputWeight inputWeight in inputWeights)
-            {
+                decimal precision = 1 / dblPrecision;
+                int maxRequestedWeight = (Convert.ToInt32(inputWeights.Max(x => x.weight) - equipmentWeight) + 1); //ensure we take upper bound of conversion
 
-                if (!inputWeight.isValid)
-                {
-                    WLBMinResult result = new WLBMinResult();
-                    result.requestedWeight = inputWeight.weightName;
-                    result.error = inputWeight.error;
-                    resultList.Add(result);
-                }
-                else if (inputWeight.weight - equipmentWeight < 0)
-                {
-                    WLBMinResult result = new WLBMinResult();
-                    result.requestedWeight = inputWeight.weightName;
-                    result.error = "Requested weight is lower than bar weight";
-                    resultList.Add(result);
-                }
+                interimResultCache = new WLBMinResult[Convert.ToInt32(maxRequestedWeight * precision) + 1]; //ensure we take upper bound of conversion
+
+                if (_WLBMinWeightCache.PeakWLBMinWeightResultCache() >= (maxRequestedWeight * precision))
+                    interimResultCache = _WLBMinWeightCache.GetWLBMinWeightResultCache();
                 else
                 {
-                    interimResultCache[Convert.ToInt32((inputWeight.weight - equipmentWeight) * precision)].requestedWeight = inputWeight.weightName;
-                    resultList.Add(interimResultCache[Convert.ToInt32((inputWeight.weight - equipmentWeight) * precision)]);
+                    IntializeWLBMinResultArray(interimResultCache, Convert.ToInt32(maxRequestedWeight * precision) + 1);  //ensure we take upper bound of conversion
+                    GetMinimumPairedPlatesForWeight(maxRequestedWeight * precision, plates.OrderBy(p => p.weight).ToList(), interimResultCache, precision);
+                    //GetMinimumPlatesForWeight(maxRequestedWeight * precision, plates.OrderBy(p => p.weight).ToList(), interimResultCache, precision);
+                    _WLBMinWeightCache.AddWLBMinWeightResultCache(interimResultCache);
                 }
+                MapResult(interimResultCache, inputWeights, equipmentWeight, precision);
             }
+
+            else
+                MapResult(null, inputWeights, equipmentWeight, 0);
+
             _loggerManager.LogInfo($"Result calculation complete:{_jsonParser.SerializeObjects(resultList)}");
             return resultList;
         }
@@ -87,6 +75,36 @@ namespace WLBApplication.Application
                             {
                                 resultCache[i].minWeightList.Add(availablePlates[j].Name, 2);
                             }
+                        }
+                    }
+                    else
+                        break;
+                }
+            }
+        }
+
+        private void GetMinimumPlatesForWeight(decimal inputWeight, List<Plate> availablePlates, WLBMinResult[] resultCache, decimal precision)
+        {
+            WLBMinResult tempResultPlaceholder;
+            for (int i = 1; i < inputWeight; i++)
+            {
+                for (int j = 0; j < availablePlates.Count; j++)
+                {
+                    if (availablePlates[j].weight <= i / precision)
+                    {
+                        if (resultCache[i].platesCount > 1 + resultCache[i - Convert.ToInt32(availablePlates[j].weight * precision)].platesCount)
+                        {
+                            tempResultPlaceholder = resultCache[i - Convert.ToInt32(availablePlates[j].weight * precision)];
+                            resultCache[i].platesCount = tempResultPlaceholder.platesCount + 1;
+                            resultCache[i].minWeightList = tempResultPlaceholder.minWeightList.ToDictionary(entry => entry.Key, entry => entry.Value); //Clone dictionary
+                            if (resultCache[i].minWeightList.ContainsKey(availablePlates[j].Name))
+                            {
+                                resultCache[i].minWeightList[availablePlates[j].Name] += 1;
+                            }
+                            else
+                            {
+                                resultCache[i].minWeightList.Add(availablePlates[j].Name, 1);
+                            }
 
                         }
 
@@ -108,11 +126,31 @@ namespace WLBApplication.Application
             {
                 interimResultCache[i] = new WLBMinResult()
                 {
-                    platesCount = int.MaxValue
+                    platesCount = maxWeight
                 };
             }
         }
 
+
+        private void MapResult(WLBMinResult[] interimResultCache,List<InputWeight> inputWeights, decimal equipmentWeight, decimal precision)
+        {
+            foreach (InputWeight inputWeight in inputWeights)
+            {
+
+                if (!inputWeight.isValid || interimResultCache ==null)
+                {
+                    WLBMinResult result = new WLBMinResult();
+                    result.RequestedWeight = inputWeight.RequestedWeight;
+                    result.error = inputWeight.error;
+                    resultList.Add(result);
+                }
+                else
+                {
+                    interimResultCache[Convert.ToInt32((inputWeight.weight - equipmentWeight) * precision)].RequestedWeight = inputWeight.RequestedWeight;
+                    resultList.Add(interimResultCache[Convert.ToInt32((inputWeight.weight - equipmentWeight) * precision)]);
+                }
+            }
+        }
 
 
     }

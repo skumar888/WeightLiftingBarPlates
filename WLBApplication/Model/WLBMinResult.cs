@@ -8,10 +8,11 @@ namespace WLBApplication.Model
     [Serializable]
     public class WLBMinResult
     {
-        public string  requestedWeight{ get; set; }
+        public string  RequestedWeight{ get; set; }
         public Dictionary<string, int> minWeightList = new Dictionary<string, int>();
         [JsonIgnore]
         public int platesCount { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public string error { get; set; }
     }
 }

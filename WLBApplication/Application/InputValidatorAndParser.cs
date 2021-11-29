@@ -24,18 +24,22 @@ namespace WLBApplication.Application
 
             foreach (InputWeight inputWeight in inputWeightList)
             {
-                try
+                if (inputWeight.isValid)
                 {
-                    if ((inputWeight.weight-equipmentWeight) % precision != 0)
-                        throw new Exception("");
-                    if(inputWeight.weight > (WLBMaximumAllowedWeightIndexes/precision))
-                        throw new Exception($"Weight limit exceeded. Allowed limit is {WLBMaximumAllowedWeightIndexes / precision}lb");
-                }
-                catch (Exception e)
-                {
-                    inputWeight.isValid = false;
-                    inputWeight.error = e.Message;
-                    inputWeight.weight = 0;
+                    try
+                    {
+                        if ((inputWeight.weight - equipmentWeight) % precision != 0 || inputWeight.weight < equipmentWeight)
+                            throw new Exception("");
+                        if (inputWeight.weight > (WLBMaximumAllowedWeightIndexes / precision))
+                            throw new Exception($"Weight limit exceeded. Allowed limit is {WLBMaximumAllowedWeightIndexes / precision}lb");
+                    }
+                    catch (Exception e)
+                    {
+                        inputWeight.isValid = false;
+                        if(e.Message != string.Empty )
+                            inputWeight.error = e.Message;
+                        inputWeight.weight = 0;
+                    }
                 }
             }
 
@@ -51,11 +55,11 @@ namespace WLBApplication.Application
 
             for (int i = 0; i < stringWeights.Length; i++)
             {
-                inputWeightList.Add(new InputWeight() { weightName = stringWeights[i] });
+                inputWeightList.Add(new InputWeight() { RequestedWeight = stringWeights[i] });
                 try
                 {
                     if (!stringWeights[i].ToLower().Contains("lb"))
-                        throw new Exception("Weight not in correct format, missing lb");
+                        throw new Exception("Weight not in correct format");
 
                     inputWeight = decimal.Parse(stringWeights[i].ToLower().Replace("lb", ""));
                     inputWeightList[i].weight = inputWeight;

@@ -47,7 +47,7 @@ namespace WLBPlatesManager.Controllers
         {
             _loggerManager.LogInfo($"Request recieved for min weight list :{inputString}");
 
-            if (inputString == null)
+            if (inputString == null || inputString.Length ==0)
             {
                 _loggerManager.LogError($"Input String missing");
                 return BadRequest();
@@ -58,10 +58,11 @@ namespace WLBPlatesManager.Controllers
             var availaiblePlates = await _platesRepository.GetAllPlates();
             var precision = _inputValidatorAndParser.GetPrecision(availaiblePlates.ToList().Select(x=>x.weight).ToArray());//gets GCD of available weight plates, which will be used to verify input weights and cal min plates
             
+            var inputWeightList = _inputValidatorAndParser.ValidateAndParseWeight(inputString, WLBMaximumAllowedWeightIndexes, availaiblePlates.ToList(), equipmentWeight, precision);
 
-            var inputWeighrList = _inputValidatorAndParser.ValidateAndParseWeight(inputString, WLBMaximumAllowedWeightIndexes, availaiblePlates.ToList(), equipmentWeight, precision);
-            var result=   _getMinimumPlates.GetMinimumPairedPlatesForWeights(inputWeighrList, equipmentWeight, precision, availaiblePlates.ToList());
-            return  Ok(_jsonParser.SerializeObjects(result));
+            var result = _getMinimumPlates.GetMinimumPairedPlatesForWeights(inputWeightList, equipmentWeight, precision, availaiblePlates.ToList());
+            return Ok(_jsonParser.SerializeObjects(result));
+
 
         }
     }
