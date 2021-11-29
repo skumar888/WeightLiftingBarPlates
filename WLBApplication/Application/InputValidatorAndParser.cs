@@ -18,7 +18,7 @@ namespace WLBApplication.Application
             _jsonParser = jsonParser;
         }
         private List<InputWeight> inputWeightList = new List<InputWeight>();
-        public List<InputWeight> ValidateAndParseWeight(string inputString, decimal WLBMaximumAllowedWeightIndexes, List<Plate> availablePlates, decimal equipmentWeight, decimal precision)
+        public List<InputWeight> ValidateAndParseWeight(string inputString, decimal WLBMaximumAllowedWeightIndexes, List<Plate> availablePlates, decimal equipmentWeight, decimal inputWeightsGCD)
         {
             ValidateWeights(inputString);
 
@@ -28,10 +28,10 @@ namespace WLBApplication.Application
                 {
                     try
                     {
-                        if ((inputWeight.weight - equipmentWeight) % precision != 0 || inputWeight.weight < equipmentWeight)
+                        if ((inputWeight.weight - equipmentWeight) % inputWeightsGCD != 0 || inputWeight.weight < equipmentWeight)
                             throw new Exception("");
-                        if (inputWeight.weight > (WLBMaximumAllowedWeightIndexes / precision))
-                            throw new Exception($"Weight limit exceeded. Allowed limit is {WLBMaximumAllowedWeightIndexes / precision}lb");
+                        if (inputWeight.weight > (WLBMaximumAllowedWeightIndexes / inputWeightsGCD))
+                            throw new Exception($"Weight limit exceeded. Allowed limit is {WLBMaximumAllowedWeightIndexes / inputWeightsGCD}lb");
                     }
                     catch (Exception e)
                     {

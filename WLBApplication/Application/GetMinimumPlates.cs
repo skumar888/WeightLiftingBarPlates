@@ -22,7 +22,7 @@ namespace WLBApplication.Application
             _loggerManager = loggerManager;
             _jsonParser = jsonParser;
         }
-        public  List<WLBMinResult> GetMinimumPairedPlatesForWeights(List<InputWeight> inputWeights, decimal equipmentWeight, decimal dblPrecision, List<Plate> plates)
+        public  List<WLBMinResult> GetMinimumPairedPlatesForWeights(List<InputWeight> inputWeights, decimal equipmentWeight, decimal inputWeightsGCD, List<Plate> plates)
         {
             _loggerManager.LogInfo($"Starting calculation for min plates using plates:{_jsonParser.SerializeObjects(plates)}");
 
@@ -30,7 +30,7 @@ namespace WLBApplication.Application
 
             if (inputWeights.Any(w => w.isValid))
             {
-                decimal precision = 1 / dblPrecision;
+                decimal precision = 1 / inputWeightsGCD;
                 int maxRequestedWeight = (Convert.ToInt32(inputWeights.Max(x => x.weight) - equipmentWeight) + 1); //ensure we take upper bound of conversion
 
                 interimResultCache = new WLBMinResult[Convert.ToInt32(maxRequestedWeight * precision) + 1]; //ensure we take upper bound of conversion

@@ -56,11 +56,11 @@ namespace WLBPlatesManager.Controllers
             var WLBMaximumAllowedWeightIndexes = _configuration.GetValue<decimal>("WLBMaximumAllowedWeightIndexes");
 
             var availaiblePlates = await _platesRepository.GetAllPlates();
-            var precision = _inputValidatorAndParser.GetPrecision(availaiblePlates.ToList().Select(x=>x.weight).ToArray());//gets GCD of available weight plates, which will be used to verify input weights and cal min plates
+            var inputWeightsGCD = _inputValidatorAndParser.GetPrecision(availaiblePlates.ToList().Select(x=>x.weight).ToArray());//gets GCD of available weight plates, which will be used to verify input weights and cal min plates
             
-            var inputWeightList = _inputValidatorAndParser.ValidateAndParseWeight(inputString, WLBMaximumAllowedWeightIndexes, availaiblePlates.ToList(), equipmentWeight, precision);
+            var inputWeightList = _inputValidatorAndParser.ValidateAndParseWeight(inputString, WLBMaximumAllowedWeightIndexes, availaiblePlates.ToList(), equipmentWeight, inputWeightsGCD);
 
-            var result = _getMinimumPlates.GetMinimumPairedPlatesForWeights(inputWeightList, equipmentWeight, precision, availaiblePlates.ToList());
+            var result = _getMinimumPlates.GetMinimumPairedPlatesForWeights(inputWeightList, equipmentWeight, inputWeightsGCD, availaiblePlates.ToList());
             return Ok(_jsonParser.SerializeObjects(result));
 
 

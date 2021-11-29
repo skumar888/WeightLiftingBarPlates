@@ -7,6 +7,6 @@ namespace WLBApplication.Application
 {
     public interface IGetMinimumPlates
     {
-        List<WLBMinResult> GetMinimumPairedPlatesForWeights(List<InputWeight> inputWeights, decimal equipmentWeight, decimal precision, List<Plate> availablePlates);
+        List<WLBMinResult> GetMinimumPairedPlatesForWeights(List<InputWeight> inputWeights, decimal equipmentWeight, decimal inputWeightsGCD, List<Plate> availablePlates);
     }
 }
